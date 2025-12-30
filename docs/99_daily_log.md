@@ -22,3 +22,12 @@
 - Spring Initializr から backend プロジェクト生成
 - /health API を作成して動作確認
 - フォルダ構成（frontend / backend / docs）の整備
+
+# Day3
+
+## 実施内容
+- src 配下のディレクトリ構成を整理（components/hooks/reducers/api/pages/styles）
+- global.css の読み込みを確認（Vite: main 側で import）
+- useReducer の下準備（initialState / actions / memoReducer）を作成
+- HomePage で reducer を接続し、ダミーデータ2件の表示を確認
+
