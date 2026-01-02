@@ -31,3 +31,9 @@
 - useReducer の下準備（initialState / actions / memoReducer）を作成
 - HomePage で reducer を接続し、ダミーデータ2件の表示を確認
 
+# Day4 作業ログ
+
+## 実施内容
+- Storybook を導入し、起動を確認（npm run storybook）
+- MemoItem を Storybook に登録し表示確認（Default / NoTags など）
+- MemoList を Storybook に登録し表示確認（Empty / Single / Multiple）
