@@ -37,3 +37,20 @@
 - Storybook を導入し、起動を確認（npm run storybook）
 - MemoItem を Storybook に登録し表示確認（Default / NoTags など）
 - MemoList を Storybook に登録し表示確認（Empty / Single / Multiple）
+
+## Day5：Spring Boot 基盤（Controller / Service 分離）
+
+### 実施内容
+- Spring Boot アプリ起動確認
+- Controller / Service / Repository のレイヤ構造を作成
+- HealthController を Service 経由で実装
+- `/health` エンドポイントで疎通確認
+
+## Day6：Memoエンティティ作成とGET /memos実装
+
+### 実施内容
+- Memo エンティティを作成（id / title / content / tags / updatedAt）
+- JPA（Hibernate）を利用した Repository を作成
+- MemoService を作成し、全件取得処理を実装
+- GET /memos エンドポイントを実装
+- H2（インメモリDB）を利用して動作確認
