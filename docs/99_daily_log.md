@@ -54,3 +54,13 @@
 - MemoService を作成し、全件取得処理を実装
 - GET /memos エンドポイントを実装
 - H2（インメモリDB）を利用して動作確認
+
+## Day7：POST /memos 実装とバリデーション追加
+
+### 実施内容
+- 新規メモ登録用の POST /memos API を実装
+- リクエスト／レスポンス用 DTO を作成（CreateMemoRequest / MemoResponse）
+- DTO にバリデーション（title 必須）を追加
+- Controller に @Valid を付与してバリデーションを有効化
+- Service に新規作成処理を追加
+- MockMvc を用いた Controller テストを作成

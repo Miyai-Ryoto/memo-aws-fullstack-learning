@@ -1,5 +1,6 @@
 package com.example.backend.service;
 
+import com.example.backend.dto.MemoResponse;
 import com.example.backend.entity.Memo;
 import com.example.backend.repository.MemoRepository;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +16,18 @@ public class MemoService {
 
     public List<Memo> findAll() {
         return memoRepository.findAll();
+    }
+
+    // Day7追加：新規作成（POST /memos 用）
+    public MemoResponse create(String title, String content, String tags) {
+        Memo saved = memoRepository.save(new Memo(title, content, tags));
+        return new MemoResponse(
+                saved.getId(),
+                saved.getTitle(),
+                saved.getContent(),
+                saved.getTags(),
+                saved.getUpdatedAt()
+        );
     }
 
     public void seed() {
