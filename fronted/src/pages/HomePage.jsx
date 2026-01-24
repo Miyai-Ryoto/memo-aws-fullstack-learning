@@ -1,20 +1,35 @@
 import { useEffect, useReducer } from "react";
 import { initialState, memoReducer } from "../reducers/memoReducer";
 import { MemoList } from "../components/MemoList.jsx";
+import { getMemos } from "../api/memoApi.jsx";
 
 export function HomePage() {
   const [state, dispatch] = useReducer(memoReducer, initialState);
 
   useEffect(() => {
-    // Day3は“動作確認用”のダミーでOK
-    dispatch({ type: "FETCH_START" });
+    let cancelled = false;
 
-    const dummy = [
-      { id: 1, title: "メモ1", content: "内容", tags: ["aws"] },
-      { id: 2, title: "メモ2", content: "内容", tags: ["react"] },
-    ];
+    (async () => {
+      dispatch({ type: "FETCH_START" });
 
-    dispatch({ type: "FETCH_SUCCESS", payload: dummy });
+      try {
+        const memos = await getMemos();
+        if (!cancelled) {
+          dispatch({ type: "FETCH_SUCCESS", payload: memos });
+        }
+      } catch (e) {
+        if (!cancelled) {
+          dispatch({
+            type: "FETCH_ERROR",
+            payload: e instanceof Error ? e.message : String(e),
+          });
+        }
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   if (state.status === "loading") return <div>Loading...</div>;

@@ -64,3 +64,14 @@
 - Controller に @Valid を付与してバリデーションを有効化
 - Service に新規作成処理を追加
 - MockMvc を用いた Controller テストを作成
+
+## Day8：React × API（GET /memos）連携、表示反映、tags型の調整
+
+### 実施内容
+- React（Vite）から Spring Boot の GET /memos を呼び出し、ダミーデータ表示を廃止
+- useReducer の status（loading / success / error）に合わせて画面を分岐表示
+- Spring Boot 側に CORS 設定（@CrossOrigin）を追加し、フロント（localhost:5173）からのアクセスを許可
+- 当初 tags が文字列（"a,b"）で返り、フロント側で join がエラーになる問題を確認
+- API契約を明確にするため、MemoResponse の tags を List<String> に変更し、Service で split して返却
+- Controller の GET /memos を Entity 返却から DTO（MemoResponse）返却に変更し、tags を配列で返すように統一
+- 動作確認：React画面にメモ一覧が安定して表示され、tags も期待通り表示できることを確認

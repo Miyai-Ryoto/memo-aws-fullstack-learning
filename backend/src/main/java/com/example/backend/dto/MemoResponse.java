@@ -1,15 +1,16 @@
 package com.example.backend.dto;
 
 import java.time.Instant;
+import java.util.List;
 
 public class MemoResponse {
     private Long id;
     private String title;
     private String content;
-    private String tags;
+    private List<String> tags;
     private Instant updatedAt;
 
-    public MemoResponse(Long id, String title, String content, String tags, Instant updatedAt) {
+    public MemoResponse(Long id, String title, String content, List<String> tags, Instant updatedAt) {
         this.id = id;
         this.title = title;
         this.content = content;
@@ -20,6 +21,6 @@ public class MemoResponse {
     public Long getId() { return id; }
     public String getTitle() { return title; }
     public String getContent() { return content; }
-    public String getTags() { return tags; }
+    public List<String> getTags() { return tags; }
     public Instant getUpdatedAt() { return updatedAt; }
 }
