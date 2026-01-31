@@ -1,10 +1,12 @@
-import { useEffect, useReducer } from "react";
+import { useEffect, useReducer, useState } from "react";
 import { initialState, memoReducer } from "../reducers/memoReducer";
 import { MemoList } from "../components/MemoList.jsx";
-import { getMemos } from "../api/memoApi.jsx";
+import { MemoForm } from "../components/MemoForm.jsx";
+import { getMemos, createMemo } from "../api/memoApi.jsx";
 
 export function HomePage() {
   const [state, dispatch] = useReducer(memoReducer, initialState);
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -32,12 +34,30 @@ export function HomePage() {
     };
   }, []);
 
-  if (state.status === "loading") return <div>Loading...</div>;
-  if (state.status === "error") return <div>Error: {state.error}</div>;
+  const handleCreate = async ({ title, content, tags }) => {
+   setSubmitting(true);
+   try {
+     const created = await createMemo({ title, content, tags });
+     dispatch({ type: "ADD_MEMO", payload: created });
+   } catch (e) {
+     dispatch({
+       type: "FETCH_ERROR",
+       payload: e instanceof Error ? e.message : String(e),
+     });
+   } finally {
+     setSubmitting(false);
+   }
+  };
 
   return (
     <div>
       <h1>MemoApp</h1>
+
+      <MemoForm onSubmit={handleCreate} submitting={submitting} />
+
+      {state.status === "loading" ? <div>Loading...</div> : null}
+      {state.status === "error" ? <div>Error: {state.error}</div> : null}
+
       <MemoList memos={state.memos} />
     </div>
   );

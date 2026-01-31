@@ -13,21 +13,19 @@ export async function getMemos() {
   return await res.json();
 }
 
-/**
- * Day9用（今は未使用でもOK）
- */
-export async function createMemo(payload) {
+export async function createMemo({ title, content, tags }) {
   const res = await fetch(`${BASE_URL}/memos`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
+    body: JSON.stringify({ title, content, tags }),
   });
 
   if (!res.ok) {
-    // Spring Validation の 400 を拾えるようにしておく
+    // Validation(400) などの情報を拾う
     const text = await res.text().catch(() => "");
-    throw new Error(`POST /memos failed: ${res.status} ${text}`);
+    throw new Error(`POST /memos failed: ${res.status} ${text}`.trim());
   }
 
   return await res.json();
 }
+

@@ -75,3 +75,13 @@
 - API契約を明確にするため、MemoResponse の tags を List<String> に変更し、Service で split して返却
 - Controller の GET /memos を Entity 返却から DTO（MemoResponse）返却に変更し、tags を配列で返すように統一
 - 動作確認：React画面にメモ一覧が安定して表示され、tags も期待通り表示できることを確認
+
+## Day9：React × API（POST /memos）連携、新規作成と一覧即時反映
+
+### 実施内容
+- React のフォーム（MemoForm）から POST /memos API を呼び出し、新規メモ登録を実装
+- 入力項目（title / content / tags）を state で管理し、送信時に API へリクエスト
+- POST 成功時に返却される MemoResponse を useReducer の state に追加し、再取得せず一覧へ即時反映
+- 送信中はボタンや入力欄を disabled にし、二重送信を防止
+- Storybook 用に MemoForm.stories.jsx を作成し、通常時／送信中状態を確認可能にした
+- Spring Boot 側の POST /memos が作成済みエンティティを返却する設計であることを確認し、フロント側の実装と整合していることを検証

@@ -15,6 +15,9 @@ export function memoReducer(state, action) {
     case "FETCH_ERROR":
       return { ...state, status: "error", error: action.payload };
 
+    case "ADD_MEMO":
+      return { ...state, memos: [action.payload, ...state.memos] };
+
     default:
       return state;
   }
