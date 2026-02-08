@@ -37,6 +37,12 @@ public class Memo {
         this.updatedAt = Instant.now();
     }
 
+    public void update(String title, String content, String tags) {
+        this.title = title;
+        this.content = content;
+        this.tags = tags;
+    }
+
     @PreUpdate
     public void onUpdate() {
         this.updatedAt = Instant.now();

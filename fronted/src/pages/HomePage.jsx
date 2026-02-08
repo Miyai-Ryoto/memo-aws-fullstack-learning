@@ -2,7 +2,7 @@ import { useEffect, useReducer, useState } from "react";
 import { initialState, memoReducer } from "../reducers/memoReducer";
 import { MemoList } from "../components/MemoList.jsx";
 import { MemoForm } from "../components/MemoForm.jsx";
-import { getMemos, createMemo } from "../api/memoApi.jsx";
+import { getMemos, createMemo, deleteMemo, updateMemo } from "../api/memoApi.jsx";
 
 export function HomePage() {
   const [state, dispatch] = useReducer(memoReducer, initialState);
@@ -35,19 +35,50 @@ export function HomePage() {
   }, []);
 
   const handleCreate = async ({ title, content, tags }) => {
-   setSubmitting(true);
-   try {
-     const created = await createMemo({ title, content, tags });
-     dispatch({ type: "ADD_MEMO", payload: created });
-   } catch (e) {
-     dispatch({
-       type: "FETCH_ERROR",
-       payload: e instanceof Error ? e.message : String(e),
-     });
-   } finally {
-     setSubmitting(false);
-   }
+    setSubmitting(true);
+    try {
+      const created = await createMemo({ title, content, tags });
+      dispatch({ type: "ADD_MEMO", payload: created });
+    } catch (e) {
+      dispatch({
+        type: "FETCH_ERROR",
+        payload: e instanceof Error ? e.message : String(e),
+      });
+    } finally {
+      setSubmitting(false);
+    }
   };
+
+  const handleDelete = async (id) => {
+    setSubmitting(true);
+    try {
+      await deleteMemo(id);
+      dispatch({ type: "DELETE_MEMO", payload: id });
+    } catch (e) {
+      dispatch({
+        type: "FETCH_ERROR",
+        payload: e instanceof Error ? e.message : String(e),
+      });
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleUpdate = async (id, { title, content, tags }) => {
+    setSubmitting(true);
+    try {
+      const updated = await updateMemo(id, { title, content, tags });
+      dispatch({ type: "UPDATE_MEMO", payload: updated });
+    } catch (e) {
+      dispatch({
+        type: "FETCH_ERROR",
+        payload: e instanceof Error ? e.message : String(e),
+      });
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
 
   return (
     <div>
@@ -58,7 +89,7 @@ export function HomePage() {
       {state.status === "loading" ? <div>Loading...</div> : null}
       {state.status === "error" ? <div>Error: {state.error}</div> : null}
 
-      <MemoList memos={state.memos} />
+      <MemoList memos={state.memos} onDelete={handleDelete} onUpdate={handleUpdate} submitting={submitting} />
     </div>
   );
 }

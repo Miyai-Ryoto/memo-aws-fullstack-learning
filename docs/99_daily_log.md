@@ -85,3 +85,18 @@
 - 送信中はボタンや入力欄を disabled にし、二重送信を防止
 - Storybook 用に MemoForm.stories.jsx を作成し、通常時／送信中状態を確認可能にした
 - Spring Boot 側の POST /memos が作成済みエンティティを返却する設計であることを確認し、フロント側の実装と整合していることを検証
+
+## Day10：React × API（PUT / DELETE）連携、更新・削除と一覧即時反映
+
+### 実施内容
+
+- Spring Boot 側で PUT /memos/{id}・DELETE /memos/{id} API を実装し、メモの更新・削除処理を追加
+- 更新・削除時に存在しない ID が指定された場合、例外を送出し 404 Not Found を返却する設計を確認
+- Entity に setter を持たせず、update メソッドによる更新処理を実装し、状態変更を意味のある操作に限定
+- @PreUpdate を利用して updatedAt を自動更新し、更新時刻を Entity の責務として管理する構成を理解
+- React 側で PUT / DELETE 用の API 関数を追加し、API 層を CRUD 対応に拡張
+- useReducer に更新・削除用の処理を追加し、再取得せず state を差し替える方式で一覧を即時反映
+- メモ一覧に編集モードを追加し、その場で内容を更新できる UI を実装
+- 削除ボタン押下時に DELETE API を呼び出し、成功時に該当メモを state から除外する UI を実装
+- 更新・削除中は submitting 状態を共有し、二重操作を防止
+- フロントエンドとバックエンドの役割分担（API 契約・状態管理・UI）が一貫していることを確認
