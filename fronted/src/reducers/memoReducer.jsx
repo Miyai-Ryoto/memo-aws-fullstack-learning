@@ -17,6 +17,14 @@ export function memoReducer(state, action) {
 
     case "ADD_MEMO":
       return { ...state, memos: [action.payload, ...state.memos] };
+    
+    case "DELETE_MEMO":
+      return { ...state, memos: state.memos.filter((m) => m.id !== action.payload),};
+    
+    case "UPDATE_MEMO": {
+      const updated = action.payload;
+      return { ...state, memos: state.memos.map((m) => (m.id === updated.id ? updated : m)),};
+    }
 
     default:
       return state;

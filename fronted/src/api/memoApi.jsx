@@ -29,3 +29,29 @@ export async function createMemo({ title, content, tags }) {
   return await res.json();
 }
 
+export async function updateMemo(id, { title, content, tags }) {
+  const res = await fetch(`${BASE_URL}/memos/${id}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ title, content, tags }),
+  });
+
+  if (!res.ok) {
+    const text = await res.text().catch(() => "");
+    throw new Error(`PUT /memos/${id} failed: ${res.status} ${text}`.trim());
+  }
+
+  return await res.json(); 
+}
+
+export async function deleteMemo(id) {
+  const res = await fetch(`${BASE_URL}/memos/${id}`, {
+    method: "DELETE",
+  });
+
+  if (!res.ok) {
+    const text = await res.text().catch(() => "");
+    throw new Error(`DELETE /memos/${id} failed: ${res.status} ${text}`.trim());
+  }
+}
+

@@ -2,9 +2,11 @@ package com.example.backend.service;
 
 import com.example.backend.dto.MemoResponse;
 import com.example.backend.entity.Memo;
+import com.example.backend.exception.MemoNotFoundException;
 import com.example.backend.repository.MemoRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
 import java.util.List;
@@ -51,6 +53,35 @@ public class MemoService {
                 .map(String::trim)
                 .filter(s -> !s.isEmpty())
                 .toList();
+    }
+
+    @Transactional
+    public void deleteMemo(Long id) {
+        // 存在チェックして、無ければ 404 にしたいので例外
+        Memo memo = memoRepository.findById(id)
+                .orElseThrow(() -> new MemoNotFoundException(id));
+    
+        memoRepository.delete(memo);
+    }
+
+    // MemoService.java のクラス内に追加
+    @Transactional
+    public MemoResponse update(Long id, String title, String content, String tags) {
+    
+        Memo memo = memoRepository.findById(id)
+                .orElseThrow(() -> new MemoNotFoundException(id));
+    
+        memo.update(title, content, tags);
+    
+        Memo saved = memoRepository.save(memo);
+    
+        return new MemoResponse(
+                saved.getId(),
+                saved.getTitle(),
+                saved.getContent(),
+                splitTags(saved.getTags()),
+                saved.getUpdatedAt()
+        );
     }
 
     public void seed() {
