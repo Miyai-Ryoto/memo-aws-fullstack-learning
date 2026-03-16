@@ -114,3 +114,18 @@
 - バリデーションエラー時に API が呼ばれないようにし、フォーム送信前にエラーチェックを完了
 - 送信後の処理として、成功時に入力内容をリセット（reset() を利用）
 - UI を通じて、送信ボタンを押せなくすることで、ユーザーによる重複送信を防止
+
+## Day12：Spring Boot × AWS RDS（MySQL）接続対応、ローカルDBからクラウドDBへの移行
+
+### 実施内容
+
+- AWS RDS に MySQL インスタンスを作成し、外部クライアント（MySQL Workbench）からの接続を確認
+- Spring Boot プロジェクトに MySQL Connector/J を追加し、MySQL ドライバを利用できるように設定
+- application.properties を共通設定として整理し、application-local.properties と application-prod.properties のプロファイル分離を実施
+- local プロファイルでは H2 を使用し、prod プロファイルでは AWS RDS(MySQL) に接続する構成を構築
+- RDS の接続情報（endpoint / username / password）を Spring Boot の spring.datasource 設定に追加
+- RDS 接続確認のため、Spring Boot 起動ログで HikariPool-1 - Start completed を確認し、データベース接続が正常に確立されていることを確認
+- memos テーブルを MySQL 側で手動作成し、Spring Boot の Entity 定義と整合するスキーマ構成を作成
+- spring.jpa.hibernate.ddl-auto=none を設定し、JPA による自動DDL生成ではなく既存テーブルを利用する方式へ変更
+- API（GET / POST / PUT / DELETE）を通じて、Spring Boot → AWS RDS(MySQL) への CRUD 操作が正常に動作することを確認
+- React → Spring Boot → RDS の一連のデータフローがローカル環境で正常に動作することを確認
