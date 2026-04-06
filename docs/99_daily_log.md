@@ -129,3 +129,13 @@
 - spring.jpa.hibernate.ddl-auto=none を設定し、JPA による自動DDL生成ではなく既存テーブルを利用する方式へ変更
 - API（GET / POST / PUT / DELETE）を通じて、Spring Boot → AWS RDS(MySQL) への CRUD 操作が正常に動作することを確認
 - React → Spring Boot → RDS の一連のデータフローがローカル環境で正常に動作することを確認
+
+## Day13：ElasticBeanstalk × S3 接続対応
+
+### 実施内容
+
+- ElasticBeanstalkにSpringBootのプロジェクトフォルダを配置
+- ElasticBeanstalkからRDSへの接続を確認
+- S3にReactのプロジェクトフォルダを配置
+- S3からElasticBeanstalkへの接続を確認
+- HTTPの状態ではアプリが実行できることを確認

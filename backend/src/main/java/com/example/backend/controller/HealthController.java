@@ -14,7 +14,7 @@ public class HealthController {
 
     private final HealthService healthService;
 
-    @GetMapping
+    @GetMapping("/")
     public String health() {
         return healthService.checkHealth();
     }

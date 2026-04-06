@@ -13,7 +13,10 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@CrossOrigin(origins = "http://localhost:5173")
+@CrossOrigin(origins = {
+    "http://localhost:5173",
+    "http://memo-app-fronted.s3-website.us-east-2.amazonaws.com"
+})
 @RestController
 @RequestMapping("/memos")
 @RequiredArgsConstructor
