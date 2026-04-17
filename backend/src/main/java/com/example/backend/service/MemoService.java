@@ -17,12 +17,7 @@ public class MemoService {
 
     private final MemoRepository memoRepository;
 
-    // 既存：Entityが欲しい用途があるなら残してOK
-    public List<Memo> findAll() {
-        return memoRepository.findAll();
-    }
-
-    // 追加：API返却用（DTOで返す）
+    // 全件データ取得
     public List<MemoResponse> findAllResponses() {
         return memoRepository.findAll().stream()
                 .map(m -> new MemoResponse(
@@ -35,7 +30,21 @@ public class MemoService {
                 .toList();
     }
 
-    // Day7追加：新規作成（POST /memos 用）
+    // ID指定にてデータを取得
+    public MemoResponse findResponseById(Long id) {
+        Memo memo = memoRepository.findById(id)
+                .orElseThrow(() -> new MemoNotFoundException(id));
+    
+        return new MemoResponse(
+                memo.getId(),
+                memo.getTitle(),
+                memo.getContent(),
+                splitTags(memo.getTags()),
+                memo.getUpdatedAt()
+        );
+    }
+
+    // 新規登録
     public MemoResponse create(String title, String content, String tags) {
         Memo saved = memoRepository.save(new Memo(title, content, tags));
         return new MemoResponse(
@@ -55,6 +64,7 @@ public class MemoService {
                 .toList();
     }
 
+    // 削除
     @Transactional
     public void deleteMemo(Long id) {
         // 存在チェックして、無ければ 404 にしたいので例外
@@ -64,7 +74,7 @@ public class MemoService {
         memoRepository.delete(memo);
     }
 
-    // MemoService.java のクラス内に追加
+    // 更新
     @Transactional
     public MemoResponse update(Long id, String title, String content, String tags) {
     

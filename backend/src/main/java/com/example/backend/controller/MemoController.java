@@ -15,6 +15,7 @@ import java.util.List;
 
 @CrossOrigin(origins = {
     "http://localhost:5173",
+    "http://localhost:5174",
     "http://memo-app-fronted.s3-website.us-east-2.amazonaws.com"
 })
 @RestController
@@ -28,6 +29,12 @@ public class MemoController {
     public List<MemoResponse> getMemos() {
         return memoService.findAllResponses();
     }
+
+    @GetMapping("/{id}")
+    public MemoResponse getMemoById(@PathVariable Long id) {
+        return memoService.findResponseById(id);
+    }
+
 
     @PostMapping
     public MemoResponse createMemo(@Valid @RequestBody CreateMemoRequest req) {

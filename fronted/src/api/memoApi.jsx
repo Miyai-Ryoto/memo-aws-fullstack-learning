@@ -13,6 +13,19 @@ export async function getMemos() {
   return await res.json();
 }
 
+export async function getMemoById(id) {
+  const res = await fetch(`${BASE_URL}/memos/${id}`, {
+    method: "GET",
+    headers: { "Content-Type": "application/json" },
+  });
+
+  if (!res.ok) {
+    throw new Error(`GET /memos/${id} failed: ${res.status}`);
+  }
+
+  return await res.json();
+}
+
 export async function createMemo({ title, content, tags }) {
   const res = await fetch(`${BASE_URL}/memos`, {
     method: "POST",

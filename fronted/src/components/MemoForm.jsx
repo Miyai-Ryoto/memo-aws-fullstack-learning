@@ -1,8 +1,15 @@
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { memoSchema } from "../validations/MemoSchema";
 
-export function MemoForm({ onSubmit, submitting }) {
+export function MemoForm({ 
+  onSubmit,
+  submitting,
+  initialValues,
+  submitLabel = "保存",
+  extraActions = null,
+ }) {
   const {
     register,
     handleSubmit,
@@ -17,10 +24,22 @@ export function MemoForm({ onSubmit, submitting }) {
     },
   });
 
+  useEffect(() => {
+    reset({
+      title: initialValues?.title ?? "",
+      content: initialValues?.content ?? "",
+      tags: initialValues?.tags ?? "",
+    });
+  }, [initialValues, reset]);
+
   const submit = async (values) => {
     try {
       await onSubmit(values);
-      reset();
+      reset({
+        title: initialValues?.title ?? "",
+        content: initialValues?.content ?? "",
+        tags: initialValues?.tags ?? "",
+      });
     } catch (e) {
       // 失敗時は入力を残す（ユーザーが修正できる）
       console.error(e);
@@ -56,9 +75,13 @@ export function MemoForm({ onSubmit, submitting }) {
         {errors.tags && <p style={{ color: "red" }}>{errors.tags.message}</p>}
       </div>
 
-      <button type="submit" disabled={disabled}>
-        {disabled ? "Saving..." : "Add Memo"}
-      </button>
+      <div style={{ display: "flex", gap: "8px", marginTop: "16px" }}>
+        <button type="submit" disabled={disabled}>
+          {disabled ? "Saving..." : submitLabel}
+        </button>
+
+        {extraActions}
+      </div>
     </form>
   );
 }
