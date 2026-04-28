@@ -1,11 +1,11 @@
-import { useEffect, useReducer } from "react";
-import { initialState, memoReducer } from "../reducers/memoReducer";
+import { useCallback, useEffect } from "react";
 import { MemoList } from "../components/MemoList.jsx";
-import { getMemos} from "../api/memoApi.jsx";
-import { useNavigate } from "react-router-dom"
+import { getMemos } from "../api/memoApi.jsx";
+import { useNavigate } from "react-router-dom";
+import { useMemos } from "../hooks/useMemo";
 
 export function HomePage() {
-  const [state, dispatch] = useReducer(memoReducer, initialState);
+  const { state, dispatch } = useMemos();
   const navigate = useNavigate();
 
   const handleMoveToCreatePage = () => {
@@ -16,31 +16,44 @@ export function HomePage() {
     navigate(`/memos/${id}/edit`);
   };
 
+  const fetchMemos = useCallback(async () => {
+    dispatch({ type: "FETCH_START" }); 
+    
+    try {
+      const memos = await getMemos();
+      dispatch({ type: "FETCH_SUCCESS", payload: memos });
+    } catch (e) {
+      dispatch({
+        type: "FETCH_ERROR",
+        payload: e instanceof Error ? e.message : String(e),
+      });
+    }
+  }, [dispatch]);
+
+   // 初回取得
   useEffect(() => {
-    let cancelled = false;
+    fetchMemos();
+  }, [fetchMemos]);
 
-    (async () => {
-      dispatch({ type: "FETCH_START" });
+  // 🔥 SSE追加
+  useEffect(() => {
+    const eventSource = new EventSource("http://localhost:8080/sse/memos");
 
-      try {
-        const memos = await getMemos();
-        if (!cancelled) {
-          dispatch({ type: "FETCH_SUCCESS", payload: memos });
-        }
-      } catch (e) {
-        if (!cancelled) {
-          dispatch({
-            type: "FETCH_ERROR",
-            payload: e instanceof Error ? e.message : String(e),
-          });
-        }
-      }
-    })();
+    eventSource.addEventListener("memo-changed", async () => {
+      console.log("SSE受信 → 再取得");
+      await fetchMemos();
+    });
+
+    eventSource.onerror = (err) => {
+      console.error("SSEエラー", err);
+      eventSource.close();
+    };
 
     return () => {
-      cancelled = true;
+      eventSource.close();
     };
-  }, []);
+  }, [fetchMemos]);
+
 
   return (
     <div>

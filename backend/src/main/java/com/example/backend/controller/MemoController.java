@@ -4,6 +4,7 @@ import com.example.backend.dto.CreateMemoRequest;
 import com.example.backend.dto.MemoResponse;
 import com.example.backend.dto.UpdateMemoRequest;
 import com.example.backend.service.MemoService;
+import com.example.backend.service.MemoSseService;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +25,7 @@ import java.util.List;
 public class MemoController {
 
     private final MemoService memoService;
+    private final MemoSseService memoSseService;
 
     @GetMapping
     public List<MemoResponse> getMemos() {
@@ -38,25 +40,38 @@ public class MemoController {
 
     @PostMapping
     public MemoResponse createMemo(@Valid @RequestBody CreateMemoRequest req) {
-        return memoService.create(req.getTitle(), req.getContent(), req.getTags());
+        MemoResponse createdMemo = memoService.create(
+            req.getTitle(), 
+            req.getContent(), 
+            req.getTags()
+        );
+        memoSseService.notifyMemoChanged();
+        return createdMemo;
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteMemo(@PathVariable Long id) {
         memoService.deleteMemo(id);
+
+        memoSseService.notifyMemoChanged();
+        
         return ResponseEntity.noContent().build();
     }
 
     @PutMapping("/{id}")
     public MemoResponse updateMemo(
             @PathVariable Long id,
-            @Valid @RequestBody UpdateMemoRequest request
+            @Valid @RequestBody UpdateMemoRequest req
     ) {
-        return memoService.update(
+        MemoResponse updatedMemo = memoService.update(
                 id,
-                request.getTitle(),
-                request.getContent(),
-                request.getTags()
+                req.getTitle(),
+                req.getContent(),
+                req.getTags()
         );
+
+        memoSseService.notifyMemoChanged();
+
+        return updatedMemo;
     }
 }

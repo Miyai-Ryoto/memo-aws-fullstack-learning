@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { MemoForm } from "../components/MemoForm.jsx";
-import { getMemoById, updateMemo, deleteMemo} from "../api/memoApi.jsx";
-import { set } from "zod";
+import { getMemoById, updateMemo, deleteMemo } from "../api/memoApi.jsx";
+import { useMemos } from "../hooks/useMemo";
 
 export function EditMemoPage() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { dispatch } = useMemos();
 
   const [memo, setMemo] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -16,7 +17,6 @@ export function EditMemoPage() {
   useEffect(() => {
     let cancelled = false;
 
-    // メモの取得
     const fetchMemo = async () => {
       setLoading(true);
       setError("");
@@ -45,13 +45,18 @@ export function EditMemoPage() {
     };
   }, [id]);
 
-  // メモの更新
   const handleUpdate = async ({ title, content, tags }) => {
     setSubmitting(true);
     setError("");
 
     try {
-      await updateMemo(id, { title, content, tags });
+      const updatedMemo = await updateMemo(id, { title, content, tags });
+
+      dispatch({
+        type: "UPDATE_MEMO",
+        payload: updatedMemo,
+      });
+
       navigate("/");
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
@@ -60,13 +65,18 @@ export function EditMemoPage() {
     }
   };
 
-  // メモの削除
   const handleDelete = async () => {
     setSubmitting(true);
     setError("");
 
     try {
       await deleteMemo(id);
+
+      dispatch({
+        type: "DELETE_MEMO",
+        payload: Number(id),
+      });
+
       navigate("/");
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
@@ -127,7 +137,6 @@ export function EditMemoPage() {
           </button>
         }
       />
-      
     </div>
   );
 }
