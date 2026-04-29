@@ -3,10 +3,12 @@ import { MemoList } from "../components/MemoList.jsx";
 import { getMemos } from "../api/memoApi.jsx";
 import { useNavigate } from "react-router-dom";
 import { useMemos } from "../hooks/useMemo";
+import { useMemoFilter } from "../hooks/useMemoFilter";
 
 export function HomePage() {
   const { state, dispatch } = useMemos();
   const navigate = useNavigate();
+  const { keyword, setKeyword, filteredMemos } = useMemoFilter(state.memos);
 
   const handleMoveToCreatePage = () => {
     navigate("/memos/new");
@@ -59,6 +61,12 @@ export function HomePage() {
     <div>
       <h1>MemoApp</h1>
 
+      <input
+        type="text"
+        placeholder="タグで絞り込み"
+        value={keyword}
+        onChange={(e) => setKeyword(e.target.value)}
+      />
       <button onClick={handleMoveToCreatePage}>
         新規登録
       </button>
@@ -67,7 +75,7 @@ export function HomePage() {
       {state.status === "error" ? <div>Error: {state.error}</div> : null}
 
       <MemoList
-        memos={state.memos}
+        memos={filteredMemos}
         onEdit={handleMoveToEditPage}
       />
     </div>
