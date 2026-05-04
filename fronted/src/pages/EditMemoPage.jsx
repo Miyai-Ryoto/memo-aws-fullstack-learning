@@ -12,14 +12,17 @@ export function EditMemoPage() {
   const [memo, setMemo] = useState(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState("");
+
+  const [errorMessage, setErrorMessage] = useState("");
+  const [fieldErrors, setFieldErrors] = useState({});
 
   useEffect(() => {
     let cancelled = false;
 
     const fetchMemo = async () => {
       setLoading(true);
-      setError("");
+      setErrorMessage("");
+      setFieldErrors({});
 
       try {
         const data = await getMemoById(id);
@@ -29,7 +32,7 @@ export function EditMemoPage() {
         }
       } catch (e) {
         if (!cancelled) {
-          setError(e instanceof Error ? e.message : String(e));
+          setErrorMessage(e?.message ?? "メモの取得に失敗しました");
         }
       } finally {
         if (!cancelled) {
@@ -47,7 +50,8 @@ export function EditMemoPage() {
 
   const handleUpdate = async ({ title, content, tags }) => {
     setSubmitting(true);
-    setError("");
+    setErrorMessage("");
+    setFieldErrors({});
 
     try {
       const updatedMemo = await updateMemo(id, { title, content, tags });
@@ -59,7 +63,12 @@ export function EditMemoPage() {
 
       navigate("/");
     } catch (e) {
-      setError(e instanceof Error ? e.message : String(e));
+      if (e?.errors) {
+        setFieldErrors(e.errors);
+        setErrorMessage(e.message ?? "入力内容を確認してください");
+      } else {
+        setErrorMessage(e?.message ?? "更新に失敗しました");
+      }
     } finally {
       setSubmitting(false);
     }
@@ -67,7 +76,8 @@ export function EditMemoPage() {
 
   const handleDelete = async () => {
     setSubmitting(true);
-    setError("");
+    setErrorMessage("");
+    setFieldErrors({});
 
     try {
       await deleteMemo(id);
@@ -79,7 +89,7 @@ export function EditMemoPage() {
 
       navigate("/");
     } catch (e) {
-      setError(e instanceof Error ? e.message : String(e));
+      setErrorMessage(e?.message ?? "削除に失敗しました"); // 新規作成と更新と異なり入力エラーはない想定なので fieldErrors は更新しない
     } finally {
       setSubmitting(false);
     }
@@ -91,17 +101,6 @@ export function EditMemoPage() {
 
   if (loading) {
     return <div>Loading...</div>;
-  }
-
-  if (error) {
-    return (
-      <div>
-        <div>Error: {error}</div>
-        <button type="button" onClick={handleBack}>
-          戻る
-        </button>
-      </div>
-    );
   }
 
   if (!memo) {
@@ -119,6 +118,12 @@ export function EditMemoPage() {
     <div>
       <h1>メモ編集</h1>
 
+      {errorMessage && (
+        <div style={{ color: "red" }}>
+          {errorMessage}
+        </div>
+      )}
+
       <button type="button" onClick={handleBack}>
         戻る
       </button>
@@ -126,6 +131,7 @@ export function EditMemoPage() {
       <MemoForm
         onSubmit={handleUpdate}
         submitting={submitting}
+        errors={fieldErrors}
         initialValues={{
           title: memo.title ?? "",
           content: memo.content ?? "",

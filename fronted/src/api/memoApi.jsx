@@ -1,5 +1,6 @@
 const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
+// メモの一覧リストを取得
 export async function getMemos() {
   const res = await fetch(`${BASE_URL}/memos`, {
     method: "GET",
@@ -13,6 +14,7 @@ export async function getMemos() {
   return await res.json();
 }
 
+// メモの詳細を取得
 export async function getMemoById(id) {
   const res = await fetch(`${BASE_URL}/memos/${id}`, {
     method: "GET",
@@ -26,6 +28,7 @@ export async function getMemoById(id) {
   return await res.json();
 }
 
+// メモの新規作成
 export async function createMemo({ title, content, tags }) {
   const res = await fetch(`${BASE_URL}/memos`, {
     method: "POST",
@@ -34,14 +37,13 @@ export async function createMemo({ title, content, tags }) {
   });
 
   if (!res.ok) {
-    // Validation(400) などの情報を拾う
-    const text = await res.text().catch(() => "");
-    throw new Error(`POST /memos failed: ${res.status} ${text}`.trim());
+    await handleErrorResponse(res, "POST /memos");
   }
 
   return await res.json();
 }
 
+// メモの更新
 export async function updateMemo(id, { title, content, tags }) {
   const res = await fetch(`${BASE_URL}/memos/${id}`, {
     method: "PUT",
@@ -50,21 +52,40 @@ export async function updateMemo(id, { title, content, tags }) {
   });
 
   if (!res.ok) {
-    const text = await res.text().catch(() => "");
-    throw new Error(`PUT /memos/${id} failed: ${res.status} ${text}`.trim());
+    await handleErrorResponse(res, `PUT /memos/${id}`);
   }
 
   return await res.json(); 
 }
 
+// メモの削除
 export async function deleteMemo(id) {
   const res = await fetch(`${BASE_URL}/memos/${id}`, {
     method: "DELETE",
   });
 
   if (!res.ok) {
-    const text = await res.text().catch(() => "");
-    throw new Error(`DELETE /memos/${id} failed: ${res.status} ${text}`.trim());
+    await handleErrorResponse(res, `DELETE /memos/${id}`);
   }
+}
+
+// APIエラーのレスポンスを処理する共通関数
+async function handleErrorResponse(res, apiName) {
+  let errorBody = null;
+
+  try {
+    errorBody = await res.json();
+  } catch {
+    errorBody = {
+      status: res.status,
+      message: `${apiName} failed`,
+    };
+  }
+
+  throw {
+    status: errorBody.status ?? res.status,
+    message: errorBody.message ?? `${apiName} failed`,
+    errors: errorBody.errors ?? {},
+  };
 }
 
