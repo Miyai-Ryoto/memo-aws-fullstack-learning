@@ -19,7 +19,7 @@ public class MemoService {
 
     // 全件データ取得
     public List<MemoResponse> findAllResponses() {
-        return memoRepository.findAll().stream()
+        return memoRepository.findAll().stream() // データが0件でも異常でははないので例外は投げない
                 .map(m -> new MemoResponse(
                         m.getId(),
                         m.getTitle(),

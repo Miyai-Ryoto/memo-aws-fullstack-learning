@@ -36,4 +36,17 @@ public class GlobalExceptionHandler {
                     "errors", errors
                 ));
     }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<Map<String, Object>> handleInternalServerError(Exception ex) {
+    
+        // ログ出力（重要）
+        ex.printStackTrace();
+    
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(Map.of(
+                    "status", 500,
+                    "message", "internal server error"
+                ));
+    }
 }

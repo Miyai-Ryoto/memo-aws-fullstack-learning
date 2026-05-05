@@ -8,7 +8,7 @@ export async function getMemos() {
   });
 
   if (!res.ok) {
-    throw new Error(`GET /memos failed: ${res.status}`);
+    await handleErrorResponse(res, "GET /memos");
   }
 
   return await res.json();
@@ -22,7 +22,7 @@ export async function getMemoById(id) {
   });
 
   if (!res.ok) {
-    throw new Error(`GET /memos/${id} failed: ${res.status}`);
+    await handleErrorResponse(res, `GET /memos/${id}`);
   }
 
   return await res.json();

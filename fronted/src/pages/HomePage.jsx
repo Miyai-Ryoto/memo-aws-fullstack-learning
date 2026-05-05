@@ -27,7 +27,7 @@ export function HomePage() {
     } catch (e) {
       dispatch({
         type: "FETCH_ERROR",
-        payload: e instanceof Error ? e.message : String(e),
+        payload: e?.message ?? "メモの取得に失敗しました",
       });
     }
   }, [dispatch]);
