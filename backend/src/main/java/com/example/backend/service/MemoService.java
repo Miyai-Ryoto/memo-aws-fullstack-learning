@@ -1,14 +1,16 @@
 package com.example.backend.service;
 
+import com.example.backend.dto.MemoDetailResponse;
+import com.example.backend.dto.MemoListResponce;
 import com.example.backend.dto.MemoResponse;
 import com.example.backend.entity.Memo;
 import com.example.backend.exception.MemoNotFoundException;
+import com.example.backend.mapper.MemoMapper;
 import com.example.backend.repository.MemoRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Arrays;
 import java.util.List;
 
 @Service
@@ -18,50 +20,24 @@ public class MemoService {
     private final MemoRepository memoRepository;
 
     // 全件データ取得
-    public List<MemoResponse> findAllResponses() {
+    public List<MemoListResponce> findAllResponses() {
         return memoRepository.findAll().stream() // データが0件でも異常でははないので例外は投げない
-                .map(m -> new MemoResponse(
-                        m.getId(),
-                        m.getTitle(),
-                        m.getContent(),
-                        splitTags(m.getTags()),
-                        m.getUpdatedAt()
-                ))
+                .map(MemoMapper::toListResponse)
                 .toList();
     }
 
     // ID指定にてデータを取得
-    public MemoResponse findResponseById(Long id) {
+    public MemoDetailResponse findResponseById(Long id) {
         Memo memo = memoRepository.findById(id)
                 .orElseThrow(() -> new MemoNotFoundException(id));
     
-        return new MemoResponse(
-                memo.getId(),
-                memo.getTitle(),
-                memo.getContent(),
-                splitTags(memo.getTags()),
-                memo.getUpdatedAt()
-        );
+        return MemoMapper.toDetailResponse(memo);
     }
 
     // 新規登録
     public MemoResponse create(String title, String content, String tags) {
         Memo saved = memoRepository.save(new Memo(title, content, tags));
-        return new MemoResponse(
-                saved.getId(),
-                saved.getTitle(),
-                saved.getContent(),
-                splitTags(saved.getTags()),
-                saved.getUpdatedAt()
-        );
-    }
-
-    private List<String> splitTags(String tags) {
-        if (tags == null || tags.isBlank()) return List.of();
-        return Arrays.stream(tags.split(","))
-                .map(String::trim)
-                .filter(s -> !s.isEmpty())
-                .toList();
+        return MemoMapper.toResponse(saved);
     }
 
     // 削除
@@ -85,13 +61,7 @@ public class MemoService {
     
         Memo saved = memoRepository.save(memo);
     
-        return new MemoResponse(
-                saved.getId(),
-                saved.getTitle(),
-                saved.getContent(),
-                splitTags(saved.getTags()),
-                saved.getUpdatedAt()
-        );
+        return MemoMapper.toResponse(saved);
     }
 
     public void seed() {

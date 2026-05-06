@@ -1,6 +1,8 @@
 package com.example.backend.controller;
 
 import com.example.backend.dto.CreateMemoRequest;
+import com.example.backend.dto.MemoDetailResponse;
+import com.example.backend.dto.MemoListResponce;
 import com.example.backend.dto.MemoResponse;
 import com.example.backend.dto.UpdateMemoRequest;
 import com.example.backend.service.MemoService;
@@ -28,12 +30,12 @@ public class MemoController {
     private final MemoSseService memoSseService;
 
     @GetMapping
-    public List<MemoResponse> getMemos() {
+    public List<MemoListResponce> getMemos() {
         return memoService.findAllResponses();
     }
 
     @GetMapping("/{id}")
-    public MemoResponse getMemoById(@PathVariable Long id) {
+    public MemoDetailResponse getMemoById(@PathVariable Long id) {
         return memoService.findResponseById(id);
     }
 
