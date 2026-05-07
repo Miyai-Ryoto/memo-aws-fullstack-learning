@@ -30,7 +30,13 @@ public class MemoController {
     private final MemoSseService memoSseService;
 
     @GetMapping
-    public List<MemoListResponce> getMemos() {
+    public List<MemoListResponce> getMemos(
+            @RequestParam(required = false) String title,
+            @RequestParam(required = false) String tag
+    ) {
+        if (title != null || tag != null) {
+            return memoService.searchResponses(title, tag);
+        }
         return memoService.findAllResponses();
     }
 

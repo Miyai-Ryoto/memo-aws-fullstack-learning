@@ -34,6 +34,23 @@ public class MemoService {
         return MemoMapper.toDetailResponse(memo);
     }
 
+    // タイトル or タグで検索
+    public List<MemoListResponce> searchResponses(String title, String tag) {
+        List<Memo> memos;
+    
+        if (title != null && !title.isBlank()) {
+            memos = memoRepository.findByTitleContainingIgnoreCase(title);
+        } else if (tag != null && !tag.isBlank()) {
+            memos = memoRepository.findByTagsContainingIgnoreCase(tag);
+        } else {
+            memos = memoRepository.findAll();
+        }
+    
+        return memos.stream()
+                .map(MemoMapper::toListResponse)
+                .toList();
+    }
+
     // 新規登録
     public MemoResponse create(String title, String content, String tags) {
         Memo saved = memoRepository.save(new Memo(title, content, tags));
