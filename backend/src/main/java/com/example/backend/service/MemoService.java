@@ -11,6 +11,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.util.Comparator;
 import java.util.List;
 
 @Service
@@ -34,16 +36,49 @@ public class MemoService {
         return MemoMapper.toDetailResponse(memo);
     }
 
-    // タイトル or タグで検索
-    public List<MemoListResponce> searchResponses(String title, String tag) {
+    // タイトル or タグ or コンテンツで検索
+    public List<MemoListResponce> searchResponses(String title, String tag, String content, LocalDate updatedFrom, LocalDate updatedTo, Boolean favoriteOnly, Boolean archivedOnly, String sort) {
         List<Memo> memos;
     
         if (title != null && !title.isBlank()) {
             memos = memoRepository.findByTitleContainingIgnoreCase(title);
         } else if (tag != null && !tag.isBlank()) {
             memos = memoRepository.findByTagsContainingIgnoreCase(tag);
+        } else if (content != null && !content.isBlank()) {
+            memos = memoRepository.findByContentContainingIgnoreCase(content);
+        } else if (updatedFrom != null && updatedTo != null) {
+            memos = memoRepository.findByUpdatedAtBetween(updatedFrom, updatedTo);
+        } else if (updatedFrom != null) {
+            memos = memoRepository.findByUpdatedAtGreaterThanEqual(updatedFrom);
+        } else if (updatedTo != null) {
+            memos = memoRepository.findByUpdatedAtLessThanEqual(updatedTo);
+        } else if (Boolean.TRUE.equals(favoriteOnly)) {
+            memos = memoRepository.findByFavoriteTrue();
+        } else if (Boolean.TRUE.equals(archivedOnly)) {
+            memos = memoRepository.findByArchivedTrue();
         } else {
             memos = memoRepository.findAll();
+        }
+
+        if ("updatedAtDesc".equals(sort)) {
+            memos = memos.stream()
+                    .sorted(Comparator.comparing(Memo::getUpdatedAt).reversed())
+                    .toList();
+    
+        } else if ("updatedAtAsc".equals(sort)) {
+            memos = memos.stream()
+                    .sorted(Comparator.comparing(Memo::getUpdatedAt))
+                    .toList();
+    
+        } else if ("titleAsc".equals(sort)) {
+            memos = memos.stream()
+                    .sorted(Comparator.comparing(Memo::getTitle))
+                    .toList();
+    
+        } else if ("titleDesc".equals(sort)) {
+            memos = memos.stream()
+                    .sorted(Comparator.comparing(Memo::getTitle).reversed())
+                    .toList();
         }
     
         return memos.stream()

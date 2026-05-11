@@ -1,8 +1,19 @@
 import { apiRequest } from "./apiClient";
 
 // メモの一覧リストを取得
-export async function getMemos() {
-  return await apiRequest("/memos", { method: "GET" }, "GET /memos");
+export async function getMemos({ title, tag, content, updatedFrom, updatedTo, favoriteOnly, archivedOnly, sort }) {
+  const queryParams = new URLSearchParams();
+  if (title) queryParams.append("title", title);
+  if (tag) queryParams.append("tag", tag);
+  if (content) queryParams.append("content", content);
+  if (updatedFrom) queryParams.append("updatedFrom", updatedFrom);
+  if (updatedTo) queryParams.append("updatedTo", updatedTo);
+  if (favoriteOnly) queryParams.append("favoriteOnly", favoriteOnly);
+  if (archivedOnly) queryParams.append("archivedOnly", archivedOnly);
+  if (sort) queryParams.append("sort", sort);
+  const queryString = queryParams.toString();
+  const url = queryString ? `/memos?${queryString}` : "/memos";
+  return await apiRequest(url, { method: "GET" }, `GET ${url}`);
 }
 
 // メモの詳細を取得

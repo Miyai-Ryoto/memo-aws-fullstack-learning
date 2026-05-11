@@ -184,3 +184,10 @@
 ### 実施内容
 
 - フロントエンドのfetch処理を共通化
+
+## Day21：デザインパターンの学習（STEP1）
+
+### 実施内容
+
+- Strategy/Specification/Query Objectを学習
+- デザインパターンを学習するために検索ロジックのService層を増やす

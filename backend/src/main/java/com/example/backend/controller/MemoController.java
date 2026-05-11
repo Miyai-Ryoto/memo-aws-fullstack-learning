@@ -14,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @CrossOrigin(origins = {
@@ -32,10 +33,16 @@ public class MemoController {
     @GetMapping
     public List<MemoListResponce> getMemos(
             @RequestParam(required = false) String title,
-            @RequestParam(required = false) String tag
+            @RequestParam(required = false) String tag,
+            @RequestParam(required = false) String content,
+            @RequestParam(required = false) LocalDate updatedFrom,
+            @RequestParam(required = false) LocalDate updatedTo,
+            @RequestParam(required = false) Boolean favoriteOnly,
+            @RequestParam(required = false) Boolean archivedOnly,
+            @RequestParam(required = false) String sort
     ) {
-        if (title != null || tag != null) {
-            return memoService.searchResponses(title, tag);
+        if (title != null || tag != null || content != null || updatedFrom != null || updatedTo != null || favoriteOnly != null || archivedOnly != null || sort != null) {
+            return memoService.searchResponses(title, tag, content, updatedFrom, updatedTo, favoriteOnly, archivedOnly, sort);
         }
         return memoService.findAllResponses();
     }
