@@ -3,16 +3,19 @@ package com.example.backend.service;
 import com.example.backend.dto.MemoDetailResponse;
 import com.example.backend.dto.MemoListResponce;
 import com.example.backend.dto.MemoResponse;
+import com.example.backend.dto.MemoSearchCondition;
 import com.example.backend.entity.Memo;
 import com.example.backend.exception.MemoNotFoundException;
 import com.example.backend.mapper.MemoMapper;
 import com.example.backend.repository.MemoRepository;
+import com.example.backend.repository.specification.MemoSpecifications;
+
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
-import java.util.Comparator;
 import java.util.List;
 
 @Service
@@ -37,49 +40,39 @@ public class MemoService {
     }
 
     // タイトル or タグ or コンテンツで検索
-    public List<MemoListResponce> searchResponses(String title, String tag, String content, LocalDate updatedFrom, LocalDate updatedTo, Boolean favoriteOnly, Boolean archivedOnly, String sort) {
-        List<Memo> memos;
-    
-        if (title != null && !title.isBlank()) {
-            memos = memoRepository.findByTitleContainingIgnoreCase(title);
-        } else if (tag != null && !tag.isBlank()) {
-            memos = memoRepository.findByTagsContainingIgnoreCase(tag);
-        } else if (content != null && !content.isBlank()) {
-            memos = memoRepository.findByContentContainingIgnoreCase(content);
-        } else if (updatedFrom != null && updatedTo != null) {
-            memos = memoRepository.findByUpdatedAtBetween(updatedFrom, updatedTo);
-        } else if (updatedFrom != null) {
-            memos = memoRepository.findByUpdatedAtGreaterThanEqual(updatedFrom);
-        } else if (updatedTo != null) {
-            memos = memoRepository.findByUpdatedAtLessThanEqual(updatedTo);
-        } else if (Boolean.TRUE.equals(favoriteOnly)) {
-            memos = memoRepository.findByFavoriteTrue();
-        } else if (Boolean.TRUE.equals(archivedOnly)) {
-            memos = memoRepository.findByArchivedTrue();
-        } else {
-            memos = memoRepository.findAll();
-        }
+    public List<MemoListResponce> searchResponses(MemoSearchCondition condition) {
 
-        if ("updatedAtDesc".equals(sort)) {
-            memos = memos.stream()
-                    .sorted(Comparator.comparing(Memo::getUpdatedAt).reversed())
-                    .toList();
+        Specification<Memo> spec = Specification.where(null);
     
-        } else if ("updatedAtAsc".equals(sort)) {
-            memos = memos.stream()
-                    .sorted(Comparator.comparing(Memo::getUpdatedAt))
-                    .toList();
-    
-        } else if ("titleAsc".equals(sort)) {
-            memos = memos.stream()
-                    .sorted(Comparator.comparing(Memo::getTitle))
-                    .toList();
-    
-        } else if ("titleDesc".equals(sort)) {
-            memos = memos.stream()
-                    .sorted(Comparator.comparing(Memo::getTitle).reversed())
-                    .toList();
+        if (condition.hasTitle()) {
+            spec = spec.and(MemoSpecifications.titleContains(condition.getTitle()));
         }
+    
+        if (condition.hasTag()) {
+            spec = spec.and(MemoSpecifications.tagContains(condition.getTag()));
+        }
+    
+        if (condition.hasContent()) {
+            spec = spec.and(MemoSpecifications.contentContains(condition.getContent()));
+        }
+    
+        if (condition.getUpdatedFrom() != null) {
+            spec = spec.and(MemoSpecifications.updatedAtGreaterThanEqual(condition.getUpdatedFrom()));
+        }
+    
+        if (condition.getUpdatedTo() != null) {
+            spec = spec.and(MemoSpecifications.updatedAtLessThanEqual(condition.getUpdatedTo()));
+        }
+    
+        if (condition.isFavoriteOnly()) {
+            spec = spec.and(MemoSpecifications.favoriteOnly());
+        }
+    
+        if (condition.isArchivedOnly()) {
+            spec = spec.and(MemoSpecifications.archivedOnly());
+        }
+    
+        List<Memo> memos = memoRepository.findAll(spec);
     
         return memos.stream()
                 .map(MemoMapper::toListResponse)

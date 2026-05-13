@@ -4,6 +4,7 @@ import com.example.backend.dto.CreateMemoRequest;
 import com.example.backend.dto.MemoDetailResponse;
 import com.example.backend.dto.MemoListResponce;
 import com.example.backend.dto.MemoResponse;
+import com.example.backend.dto.MemoSearchCondition;
 import com.example.backend.dto.UpdateMemoRequest;
 import com.example.backend.service.MemoService;
 import com.example.backend.service.MemoSseService;
@@ -14,7 +15,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDate;
 import java.util.List;
 
 @CrossOrigin(origins = {
@@ -31,19 +31,11 @@ public class MemoController {
     private final MemoSseService memoSseService;
 
     @GetMapping
-    public List<MemoListResponce> getMemos(
-            @RequestParam(required = false) String title,
-            @RequestParam(required = false) String tag,
-            @RequestParam(required = false) String content,
-            @RequestParam(required = false) LocalDate updatedFrom,
-            @RequestParam(required = false) LocalDate updatedTo,
-            @RequestParam(required = false) Boolean favoriteOnly,
-            @RequestParam(required = false) Boolean archivedOnly,
-            @RequestParam(required = false) String sort
-    ) {
-        if (title != null || tag != null || content != null || updatedFrom != null || updatedTo != null || favoriteOnly != null || archivedOnly != null || sort != null) {
-            return memoService.searchResponses(title, tag, content, updatedFrom, updatedTo, favoriteOnly, archivedOnly, sort);
+    public List<MemoListResponce> getMemos(MemoSearchCondition condition) {
+        if (condition.hasCondition()) {
+            return memoService.searchResponses(condition);
         }
+        
         return memoService.findAllResponses();
     }
 
