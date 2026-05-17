@@ -16,6 +16,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -42,36 +43,40 @@ public class MemoService {
     // タイトル or タグ or コンテンツで検索
     public List<MemoListResponce> searchResponses(MemoSearchCondition condition) {
 
-        Specification<Memo> spec = Specification.where(null);
+        List<Specification<Memo>> specs = new ArrayList<>();
     
         if (condition.hasTitle()) {
-            spec = spec.and(MemoSpecifications.titleContains(condition.getTitle()));
+            specs.add(MemoSpecifications.titleContains(condition.getTitle()));
         }
     
         if (condition.hasTag()) {
-            spec = spec.and(MemoSpecifications.tagContains(condition.getTag()));
+            specs.add(MemoSpecifications.tagContains(condition.getTag()));
         }
     
         if (condition.hasContent()) {
-            spec = spec.and(MemoSpecifications.contentContains(condition.getContent()));
+            specs.add(MemoSpecifications.contentContains(condition.getContent()));
         }
     
         if (condition.getUpdatedFrom() != null) {
-            spec = spec.and(MemoSpecifications.updatedAtGreaterThanEqual(condition.getUpdatedFrom()));
+            specs.add(MemoSpecifications.updatedAtGreaterThanEqual(condition.getUpdatedFrom()));
         }
     
         if (condition.getUpdatedTo() != null) {
-            spec = spec.and(MemoSpecifications.updatedAtLessThanEqual(condition.getUpdatedTo()));
+            specs.add(MemoSpecifications.updatedAtLessThanEqual(condition.getUpdatedTo()));
         }
     
         if (condition.isFavoriteOnly()) {
-            spec = spec.and(MemoSpecifications.favoriteOnly());
+            specs.add(MemoSpecifications.favoriteOnly());
         }
     
         if (condition.isArchivedOnly()) {
-            spec = spec.and(MemoSpecifications.archivedOnly());
+            specs.add(MemoSpecifications.archivedOnly());
         }
-    
+
+        Specification<Memo> spec = specs.stream()
+                .reduce(Specification::and)
+                .orElse(null);
+
         List<Memo> memos = memoRepository.findAll(spec);
     
         return memos.stream()
