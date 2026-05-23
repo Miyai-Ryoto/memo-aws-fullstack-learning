@@ -9,6 +9,7 @@ import com.example.backend.exception.MemoNotFoundException;
 import com.example.backend.mapper.MemoMapper;
 import com.example.backend.repository.MemoRepository;
 import com.example.backend.repository.specification.MemoSpecifications;
+import com.example.backend.service.strategy.MemoSortStrategyResolver;
 
 import lombok.RequiredArgsConstructor;
 
@@ -24,6 +25,7 @@ import java.util.List;
 public class MemoService {
 
     private final MemoRepository memoRepository;
+    private final MemoSortStrategyResolver memoSortStrategyResolver;
 
     // 全件データ取得
     public List<MemoListResponce> findAllResponses() {
@@ -78,8 +80,15 @@ public class MemoService {
                 .orElse(null);
 
         List<Memo> memos = memoRepository.findAll(spec);
-    
-        return memos.stream()
+
+        List<Memo> sortedMemos = memoSortStrategyResolver
+                .resolve(condition.getSort())
+                .map(strategy -> memos.stream()
+                        .sorted(strategy.getComparator())
+                        .toList())
+                .orElse(memos);
+        
+        return sortedMemos.stream()
                 .map(MemoMapper::toListResponse)
                 .toList();
     }
