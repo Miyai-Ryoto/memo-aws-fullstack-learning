@@ -2,6 +2,8 @@ package com.example.backend.dto;
 
 import java.time.LocalDate;
 
+import com.example.backend.dto.request.MemoSortType;
+
 public class MemoSearchCondition {
 
     private String title;
@@ -11,7 +13,7 @@ public class MemoSearchCondition {
     private LocalDate updatedTo;
     private Boolean favoriteOnly;
     private Boolean archivedOnly;
-    private String sort;
+    private MemoSortType sort;
 
     public String getTitle() {
         return title;
@@ -69,11 +71,11 @@ public class MemoSearchCondition {
         this.archivedOnly = archivedOnly;
     }
 
-    public String getSort() {
+    public MemoSortType getSort() {
         return sort;
     }
 
-    public void setSort(String sort) {
+    public void setSort(MemoSortType sort) {
         this.sort = sort;
     }
 
@@ -85,7 +87,7 @@ public class MemoSearchCondition {
                 || updatedTo != null
                 || favoriteOnly != null
                 || archivedOnly != null
-                || hasText(sort);
+                || sort != null;
     }
 
     public boolean hasTitle() {
@@ -109,7 +111,7 @@ public class MemoSearchCondition {
     }
 
     public boolean hasSort() {
-        return hasText(sort);
+        return sort != null;
     }
 
     private boolean hasText(String value) {
