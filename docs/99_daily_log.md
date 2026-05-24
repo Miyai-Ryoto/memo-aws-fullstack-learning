@@ -191,3 +191,10 @@
 
 - Strategy/Specification/Query Objectを学習
 - デザインパターンを学習するために検索ロジックのService層を増やす
+
+## Day22：デザインパターンの学習（STEP2）
+
+### 実施内容
+
+- Strategy/Factory/Template Methodを学習
+- デザインパターンを学習するためにメモの種類を追加し処理分岐を増やす

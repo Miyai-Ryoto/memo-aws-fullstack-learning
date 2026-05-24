@@ -47,11 +47,7 @@ public class MemoController {
 
     @PostMapping
     public MemoResponse createMemo(@Valid @RequestBody CreateMemoRequest req) {
-        MemoResponse createdMemo = memoService.create(
-            req.getTitle(), 
-            req.getContent(), 
-            req.getTags()
-        );
+        MemoResponse createdMemo = memoService.create(req);
         memoSseService.notifyMemoChanged();
         return createdMemo;
     }
