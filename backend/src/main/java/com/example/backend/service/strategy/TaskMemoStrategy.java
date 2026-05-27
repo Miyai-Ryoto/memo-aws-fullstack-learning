@@ -2,13 +2,14 @@ package com.example.backend.service.strategy;
 
 import org.springframework.stereotype.Component;
 import com.example.backend.dto.CreateMemoRequest;
+import com.example.backend.dto.request.MemoType;
 
 @Component
 public class TaskMemoStrategy implements MemoTypeStrategy {
 
     @Override
-    public String getType() {
-        return "task";
+    public MemoType getType() {
+        return MemoType.TASK;
     }
 
     @Override

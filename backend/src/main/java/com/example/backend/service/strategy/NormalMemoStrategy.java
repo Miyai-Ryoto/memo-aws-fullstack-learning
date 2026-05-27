@@ -1,14 +1,16 @@
 package com.example.backend.service.strategy;
 
 import com.example.backend.dto.CreateMemoRequest;
+import com.example.backend.dto.request.MemoType;
+
 import org.springframework.stereotype.Component;
 
 @Component
 public class NormalMemoStrategy implements MemoTypeStrategy {
 
     @Override
-    public String getType() {
-        return "normal";
+    public MemoType getType() {
+        return MemoType.NORMAL;
     }
 
     @Override

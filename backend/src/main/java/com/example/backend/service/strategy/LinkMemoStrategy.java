@@ -1,14 +1,16 @@
 package com.example.backend.service.strategy;
 
 import com.example.backend.dto.CreateMemoRequest;
+import com.example.backend.dto.request.MemoType;
+
 import org.springframework.stereotype.Component;
 
 @Component
 public class LinkMemoStrategy implements MemoTypeStrategy {
 
     @Override
-    public String getType() {
-        return "link";
+    public MemoType getType() {
+        return MemoType.LINK;
     }
 
     @Override

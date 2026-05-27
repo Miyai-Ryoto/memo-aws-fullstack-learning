@@ -5,12 +5,14 @@ import com.example.backend.dto.MemoDetailResponse;
 import com.example.backend.dto.MemoListResponce;
 import com.example.backend.dto.MemoResponse;
 import com.example.backend.dto.MemoSearchCondition;
+import com.example.backend.dto.request.MemoType;
 import com.example.backend.entity.Memo;
 import com.example.backend.exception.MemoNotFoundException;
 import com.example.backend.mapper.MemoMapper;
 import com.example.backend.repository.MemoRepository;
 import com.example.backend.repository.specification.MemoSpecifications;
 import com.example.backend.service.strategy.MemoSortStrategyResolver;
+import com.example.backend.service.strategy.MemoTypeStrategyResolver;
 
 import lombok.RequiredArgsConstructor;
 
@@ -27,6 +29,7 @@ public class MemoService {
 
     private final MemoRepository memoRepository;
     private final MemoSortStrategyResolver memoSortStrategyResolver;
+    private final MemoTypeStrategyResolver memoTypeStrategyResolver;
 
     // 全件データ取得
     public List<MemoListResponce> findAllResponses() {
@@ -96,28 +99,10 @@ public class MemoService {
 
     // 新規登録
     public MemoResponse create(CreateMemoRequest request) {
+        MemoType memoType = MemoType.from(request.getType());
 
-        if ("normal".equals(request.getType())) {
-            // 通常メモは特別なチェックなし
-    
-        } else if ("task".equals(request.getType())) {
-            if (request.getDueDate() == null || request.getDueDate().isBlank()) {
-                throw new IllegalArgumentException("タスクメモには期限が必要です");
-            }
-    
-        } else if ("link".equals(request.getType())) {
-            if (request.getUrl() == null || request.getUrl().isBlank()) {
-                throw new IllegalArgumentException("リンクメモにはURLが必要です");
-            }
-    
-            if (!request.getUrl().startsWith("http://") && !request.getUrl().startsWith("https://")) {
-                throw new IllegalArgumentException("URLの形式が正しくありません");
-            }
-    
-        } else {
-            throw new IllegalArgumentException("不明なメモ種類です");
-        }
-        
+        memoTypeStrategyResolver.resolve(memoType).validate(request);
+
         Memo saved = memoRepository.save(new Memo(request.getTitle(), request.getContent(), request.getTags()));
 
         return MemoMapper.toResponse(saved);
