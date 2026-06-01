@@ -5,14 +5,13 @@ import com.example.backend.dto.MemoDetailResponse;
 import com.example.backend.dto.MemoListResponce;
 import com.example.backend.dto.MemoResponse;
 import com.example.backend.dto.MemoSearchCondition;
-import com.example.backend.dto.request.MemoType;
 import com.example.backend.entity.Memo;
 import com.example.backend.exception.MemoNotFoundException;
 import com.example.backend.mapper.MemoMapper;
 import com.example.backend.repository.MemoRepository;
 import com.example.backend.repository.specification.MemoSpecifications;
+import com.example.backend.service.factory.MemoFactory;
 import com.example.backend.service.strategy.MemoSortStrategyResolver;
-import com.example.backend.service.strategy.MemoTypeStrategyResolver;
 
 import lombok.RequiredArgsConstructor;
 
@@ -28,8 +27,8 @@ import java.util.List;
 public class MemoService {
 
     private final MemoRepository memoRepository;
+    private final MemoFactory memoFactory;
     private final MemoSortStrategyResolver memoSortStrategyResolver;
-    private final MemoTypeStrategyResolver memoTypeStrategyResolver;
 
     // 全件データ取得
     public List<MemoListResponce> findAllResponses() {
@@ -99,11 +98,9 @@ public class MemoService {
 
     // 新規登録
     public MemoResponse create(CreateMemoRequest request) {
-        MemoType memoType = MemoType.from(request.getType());
+        Memo memo = memoFactory.create(request);
 
-        memoTypeStrategyResolver.resolve(memoType).validate(request);
-
-        Memo saved = memoRepository.save(new Memo(request.getTitle(), request.getContent(), request.getTags()));
+        Memo saved = memoRepository.save(memo);
 
         return MemoMapper.toResponse(saved);
     }
