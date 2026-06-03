@@ -5,13 +5,15 @@ import com.example.backend.dto.MemoDetailResponse;
 import com.example.backend.dto.MemoListResponce;
 import com.example.backend.dto.MemoResponse;
 import com.example.backend.dto.MemoSearchCondition;
+import com.example.backend.dto.request.MemoType;
 import com.example.backend.entity.Memo;
 import com.example.backend.exception.MemoNotFoundException;
 import com.example.backend.mapper.MemoMapper;
 import com.example.backend.repository.MemoRepository;
 import com.example.backend.repository.specification.MemoSpecifications;
-import com.example.backend.service.factory.MemoFactory;
+import com.example.backend.service.factory.MemoCreatorResolver;
 import com.example.backend.service.strategy.MemoSortStrategyResolver;
+import com.example.backend.service.strategy.MemoTypeStrategyResolver;
 
 import lombok.RequiredArgsConstructor;
 
@@ -27,8 +29,9 @@ import java.util.List;
 public class MemoService {
 
     private final MemoRepository memoRepository;
-    private final MemoFactory memoFactory;
     private final MemoSortStrategyResolver memoSortStrategyResolver;
+    private final MemoTypeStrategyResolver memoTypeStrategyResolver;
+    private final MemoCreatorResolver memoCreatorResolver;
 
     // 全件データ取得
     public List<MemoListResponce> findAllResponses() {
@@ -37,7 +40,7 @@ public class MemoService {
                 .toList();
     }
 
-    // ID指定にてデータを取得
+    // 単件データ取得
     public MemoDetailResponse findResponseById(Long id) {
         Memo memo = memoRepository.findById(id)
                 .orElseThrow(() -> new MemoNotFoundException(id));
@@ -45,7 +48,7 @@ public class MemoService {
         return MemoMapper.toDetailResponse(memo);
     }
 
-    // タイトル or タグ or コンテンツで検索
+    // 検索
     public List<MemoListResponce> searchResponses(MemoSearchCondition condition) {
 
         List<Specification<Memo>> specs = new ArrayList<>();
@@ -98,8 +101,9 @@ public class MemoService {
 
     // 新規登録
     public MemoResponse create(CreateMemoRequest request) {
-        Memo memo = memoFactory.create(request);
-
+        MemoType memoType = MemoType.from(request.getType());
+        memoTypeStrategyResolver.resolve(memoType).validate(request);
+        Memo memo = memoCreatorResolver.resolve(memoType).create(request);
         Memo saved = memoRepository.save(memo);
 
         return MemoMapper.toResponse(saved);
