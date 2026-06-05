@@ -11,9 +11,8 @@ import com.example.backend.exception.MemoNotFoundException;
 import com.example.backend.mapper.MemoMapper;
 import com.example.backend.repository.MemoRepository;
 import com.example.backend.repository.specification.MemoSpecifications;
-import com.example.backend.service.factory.MemoCreatorResolver;
 import com.example.backend.service.strategy.MemoSortStrategyResolver;
-import com.example.backend.service.strategy.MemoTypeStrategyResolver;
+import com.example.backend.service.template.MemoCreateTemplateResolver;
 
 import lombok.RequiredArgsConstructor;
 
@@ -30,8 +29,7 @@ public class MemoService {
 
     private final MemoRepository memoRepository;
     private final MemoSortStrategyResolver memoSortStrategyResolver;
-    private final MemoTypeStrategyResolver memoTypeStrategyResolver;
-    private final MemoCreatorResolver memoCreatorResolver;
+    private final MemoCreateTemplateResolver memoCreateTemplateResolver;
 
     // 全件データ取得
     public List<MemoListResponce> findAllResponses() {
@@ -102,11 +100,10 @@ public class MemoService {
     // 新規登録
     public MemoResponse create(CreateMemoRequest request) {
         MemoType memoType = MemoType.from(request.getType());
-        memoTypeStrategyResolver.resolve(memoType).validate(request);
-        Memo memo = memoCreatorResolver.resolve(memoType).create(request);
-        Memo saved = memoRepository.save(memo);
 
-        return MemoMapper.toResponse(saved);
+        return memoCreateTemplateResolver
+                .resolve(memoType)
+                .create(request);
     }
 
     // 削除
