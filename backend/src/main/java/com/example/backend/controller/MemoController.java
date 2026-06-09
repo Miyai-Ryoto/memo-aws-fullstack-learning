@@ -6,6 +6,8 @@ import com.example.backend.dto.MemoListResponce;
 import com.example.backend.dto.MemoResponse;
 import com.example.backend.dto.MemoSearchCondition;
 import com.example.backend.dto.UpdateMemoRequest;
+import com.example.backend.service.MemoLogService;
+import com.example.backend.service.MemoMailService;
 import com.example.backend.service.MemoService;
 import com.example.backend.service.MemoSseService;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -29,6 +31,8 @@ public class MemoController {
 
     private final MemoService memoService;
     private final MemoSseService memoSseService;
+    private final MemoLogService memoLogService;
+    private final MemoMailService memoMailService;
 
     @GetMapping
     public List<MemoListResponce> getMemos(MemoSearchCondition condition) {
@@ -49,6 +53,8 @@ public class MemoController {
     public MemoResponse createMemo(@Valid @RequestBody CreateMemoRequest req) {
         MemoResponse createdMemo = memoService.create(req);
         memoSseService.notifyMemoChanged();
+        memoLogService.writeLog();
+        memoMailService.send();
         return createdMemo;
     }
 
@@ -57,7 +63,8 @@ public class MemoController {
         memoService.deleteMemo(id);
 
         memoSseService.notifyMemoChanged();
-        
+        memoLogService.writeLog();
+        memoMailService.send();
         return ResponseEntity.noContent().build();
     }
 
@@ -74,6 +81,8 @@ public class MemoController {
         );
 
         memoSseService.notifyMemoChanged();
+        memoLogService.writeLog();
+        memoMailService.send();
 
         return updatedMemo;
     }

@@ -198,3 +198,10 @@
 
 - Strategy/Factory/Template Methodを学習
 - デザインパターンを学習するためにメモの種類を追加し処理分岐を増やす
+
+## Day23：デザインパターンの学習（STEP3）
+
+### 実施内容
+
+- Observer/Publisher-Subscriber/Adapterを学習
+- デザインパターンを学習するためにｓrollertno層に通知を増やす
