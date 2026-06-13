@@ -204,4 +204,4 @@
 ### 実施内容
 
 - Observer/Publisher-Subscriber/Adapterを学習
-- デザインパターンを学習するためにｓrollertno層に通知を増やす
+- デザインパターンを学習するためにcontroller層に通知を増やす

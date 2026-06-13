@@ -6,10 +6,9 @@ import com.example.backend.dto.MemoListResponce;
 import com.example.backend.dto.MemoResponse;
 import com.example.backend.dto.MemoSearchCondition;
 import com.example.backend.dto.UpdateMemoRequest;
-import com.example.backend.service.MemoLogService;
-import com.example.backend.service.MemoMailService;
 import com.example.backend.service.MemoService;
-import com.example.backend.service.MemoSseService;
+import com.example.backend.service.observer.MemoNotificationPublisher;
+
 import org.springframework.web.bind.annotation.CrossOrigin;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -30,9 +29,7 @@ import java.util.List;
 public class MemoController {
 
     private final MemoService memoService;
-    private final MemoSseService memoSseService;
-    private final MemoLogService memoLogService;
-    private final MemoMailService memoMailService;
+    private final MemoNotificationPublisher memoNotificationPublisher;
 
     @GetMapping
     public List<MemoListResponce> getMemos(MemoSearchCondition condition) {
@@ -52,19 +49,14 @@ public class MemoController {
     @PostMapping
     public MemoResponse createMemo(@Valid @RequestBody CreateMemoRequest req) {
         MemoResponse createdMemo = memoService.create(req);
-        memoSseService.notifyMemoChanged();
-        memoLogService.writeLog();
-        memoMailService.send();
+        memoNotificationPublisher.publishMemoChanged("created");
         return createdMemo;
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteMemo(@PathVariable Long id) {
         memoService.deleteMemo(id);
-
-        memoSseService.notifyMemoChanged();
-        memoLogService.writeLog();
-        memoMailService.send();
+        memoNotificationPublisher.publishMemoChanged("deleted");
         return ResponseEntity.noContent().build();
     }
 
@@ -80,9 +72,7 @@ public class MemoController {
                 req.getTags()
         );
 
-        memoSseService.notifyMemoChanged();
-        memoLogService.writeLog();
-        memoMailService.send();
+        memoNotificationPublisher.publishMemoChanged("updated");
 
         return updatedMemo;
     }
