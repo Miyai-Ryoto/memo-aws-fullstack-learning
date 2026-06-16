@@ -5,6 +5,8 @@ import jakarta.validation.constraints.Size;
 
 public class CreateMemoRequest {
 
+    @NotBlank(message = "status is required")
+    private String status;
     @NotBlank(message = "title is required")
     @Size(max = 100, message = "title must be at most 100 characters")
     private String title;
@@ -19,6 +21,7 @@ public class CreateMemoRequest {
 
     public CreateMemoRequest() {}
 
+    public String getStatus() { return status; }
     public String getTitle() { return title; }
     public String getContent() { return content; }
     public String getTags() { return tags; }

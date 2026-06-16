@@ -5,6 +5,7 @@ import com.example.backend.dto.MemoDetailResponse;
 import com.example.backend.dto.MemoListResponce;
 import com.example.backend.dto.MemoResponse;
 import com.example.backend.dto.MemoSearchCondition;
+import com.example.backend.dto.request.MemoStatus;
 import com.example.backend.dto.request.MemoType;
 import com.example.backend.entity.Memo;
 import com.example.backend.exception.MemoNotFoundException;
@@ -123,7 +124,39 @@ public class MemoService {
         Memo memo = memoRepository.findById(id)
                 .orElseThrow(() -> new MemoNotFoundException(id));
     
-        memo.update(title, content, tags);
+        if (memo.getStatus() == MemoStatus.DRAFT) {
+    
+            // 下書きは全部更新可能
+            memo.update(MemoStatus.DRAFT, title, content, tags);
+    
+        } else if (memo.getStatus() == MemoStatus.PUBLISHED) {
+    
+            // 公開中は本文とタグだけ更新可能、タイトルは変更不可にする
+            memo.update(MemoStatus.PUBLISHED, memo.getTitle(), content, tags);
+    
+        } else if (memo.getStatus() == MemoStatus.ARCHIVED) {
+    
+            // アーカイブ済みは更新不可
+            throw new IllegalStateException("アーカイブ済みメモは更新できません");
+    
+        } else if (memo.getStatus() == MemoStatus.DELETED) {
+    
+            // 削除済みは更新不可
+            throw new IllegalStateException("削除済みメモは更新できません");
+    
+        } else if (memo.getStatus() == MemoStatus.LOCKED) {
+    
+            // ロック中は更新不可
+            throw new IllegalStateException("ロック中メモは更新できません");
+    
+        } else if (memo.getStatus() == MemoStatus.WAITING_APPROVAL) {
+    
+            // 承認待ちは更新不可
+            throw new IllegalStateException("承認待ちメモは更新できません");
+    
+        } else {
+            throw new IllegalStateException("不明なメモ状態です");
+        }
     
         Memo saved = memoRepository.save(memo);
     
@@ -132,8 +165,8 @@ public class MemoService {
 
     public void seed() {
         if (memoRepository.count() == 0) {
-            memoRepository.save(new Memo("はじめてのメモ", "Day6: GET /memos を作った", "day6,backend"));
-            memoRepository.save(new Memo("次にやること", "POST /memos を作る", "todo,api"));
+            memoRepository.save(new Memo(MemoStatus.DRAFT, "はじめてのメモ", "Day6: GET /memos を作った", "day6,backend"));
+            memoRepository.save(new Memo(MemoStatus.DRAFT, "次にやること", "POST /memos を作る", "todo,api"));
         }
     }
 }

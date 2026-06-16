@@ -3,6 +3,7 @@ package com.example.backend.service.factory;
 import org.springframework.stereotype.Component;
 
 import com.example.backend.dto.CreateMemoRequest;
+import com.example.backend.dto.request.MemoStatus;
 import com.example.backend.dto.request.MemoType;
 import com.example.backend.entity.Memo;
 import com.example.backend.service.strategy.MemoTypeStrategyResolver;
@@ -23,6 +24,7 @@ public class MemoFactory {
                 .validate(request);
 
         return new Memo(
+                MemoStatus.DRAFT,
                 request.getTitle(),
                 request.getContent(),
                 request.getTags()

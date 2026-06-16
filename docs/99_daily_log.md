@@ -205,3 +205,10 @@
 
 - Observer/Publisher-Subscriber/Adapterを学習
 - デザインパターンを学習するためにcontroller層に通知を増やす
+
+## Day24：デザインパターンの学習（STEP4）
+
+### 実施内容
+
+- Stateを学習
+- デザインパターンを学習するためにservice層にメモの状態に応じた登録ルールを増やす

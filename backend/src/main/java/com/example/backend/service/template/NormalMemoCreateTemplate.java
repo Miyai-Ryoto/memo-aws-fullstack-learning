@@ -3,6 +3,7 @@ package com.example.backend.service.template;
 import org.springframework.stereotype.Component;
 
 import com.example.backend.dto.CreateMemoRequest;
+import com.example.backend.dto.request.MemoStatus;
 import com.example.backend.dto.request.MemoType;
 import com.example.backend.entity.Memo;
 import com.example.backend.repository.MemoRepository;
@@ -26,6 +27,7 @@ public class NormalMemoCreateTemplate extends MemoCreateTemplate {
     @Override
     protected Memo createMemo(CreateMemoRequest request) {
         return new Memo(
+                MemoStatus.DRAFT,
                 request.getTitle(),
                 request.getContent(),
                 request.getTags()
