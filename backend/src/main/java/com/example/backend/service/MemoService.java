@@ -12,6 +12,8 @@ import com.example.backend.exception.MemoNotFoundException;
 import com.example.backend.mapper.MemoMapper;
 import com.example.backend.repository.MemoRepository;
 import com.example.backend.repository.specification.MemoSpecifications;
+import com.example.backend.service.state.MemoState;
+import com.example.backend.service.state.MemoStateResolver;
 import com.example.backend.service.strategy.MemoSortStrategyResolver;
 import com.example.backend.service.template.MemoCreateTemplateResolver;
 
@@ -31,6 +33,7 @@ public class MemoService {
     private final MemoRepository memoRepository;
     private final MemoSortStrategyResolver memoSortStrategyResolver;
     private final MemoCreateTemplateResolver memoCreateTemplateResolver;
+    private final MemoStateResolver memoStateResolver;
 
     // 全件データ取得
     public List<MemoListResponce> findAllResponses() {
@@ -113,6 +116,9 @@ public class MemoService {
         // 存在チェックして、無ければ 404 にしたいので例外
         Memo memo = memoRepository.findById(id)
                 .orElseThrow(() -> new MemoNotFoundException(id));
+        
+        MemoState memoState = memoStateResolver.resolve(memo.getStatus());
+        memoState.delete(memo);
     
         memoRepository.delete(memo);
     }
@@ -123,40 +129,54 @@ public class MemoService {
     
         Memo memo = memoRepository.findById(id)
                 .orElseThrow(() -> new MemoNotFoundException(id));
+        
+        MemoState memoState = memoStateResolver.resolve(memo.getStatus());
+        memoState.update(memo, title, content, tags);
     
-        if (memo.getStatus() == MemoStatus.DRAFT) {
+        Memo saved = memoRepository.save(memo);
     
-            // 下書きは全部更新可能
-            memo.update(MemoStatus.DRAFT, title, content, tags);
+        return MemoMapper.toResponse(saved);
+    }
+
+    // 公開
+    @Transactional
+    public MemoResponse publishMemo(Long id) {
     
-        } else if (memo.getStatus() == MemoStatus.PUBLISHED) {
+        Memo memo = memoRepository.findById(id)
+                .orElseThrow(() -> new MemoNotFoundException(id));
+        
+        MemoState memoState = memoStateResolver.resolve(memo.getStatus());
+        memoState.publish(memo);
     
-            // 公開中は本文とタグだけ更新可能、タイトルは変更不可にする
-            memo.update(MemoStatus.PUBLISHED, memo.getTitle(), content, tags);
+        Memo saved = memoRepository.save(memo);
     
-        } else if (memo.getStatus() == MemoStatus.ARCHIVED) {
+        return MemoMapper.toResponse(saved);
+    }
+
+    // アーカイブ
+    @Transactional
+    public MemoResponse archiveMemo(Long id) {
     
-            // アーカイブ済みは更新不可
-            throw new IllegalStateException("アーカイブ済みメモは更新できません");
+        Memo memo = memoRepository.findById(id)
+                .orElseThrow(() -> new MemoNotFoundException(id));
     
-        } else if (memo.getStatus() == MemoStatus.DELETED) {
+        MemoState memoState = memoStateResolver.resolve(memo.getStatus());
+        memoState.archive(memo);
     
-            // 削除済みは更新不可
-            throw new IllegalStateException("削除済みメモは更新できません");
+        Memo saved = memoRepository.save(memo);
     
-        } else if (memo.getStatus() == MemoStatus.LOCKED) {
+        return MemoMapper.toResponse(saved);
+    }
+
+    // 復元
+    @Transactional
+    public MemoResponse restoreMemo(Long id) {
     
-            // ロック中は更新不可
-            throw new IllegalStateException("ロック中メモは更新できません");
-    
-        } else if (memo.getStatus() == MemoStatus.WAITING_APPROVAL) {
-    
-            // 承認待ちは更新不可
-            throw new IllegalStateException("承認待ちメモは更新できません");
-    
-        } else {
-            throw new IllegalStateException("不明なメモ状態です");
-        }
+        Memo memo = memoRepository.findById(id)
+                .orElseThrow(() -> new MemoNotFoundException(id));
+        
+        MemoState memoState = memoStateResolver.resolve(memo.getStatus());
+        memoState.restore(memo);
     
         Memo saved = memoRepository.save(memo);
     
