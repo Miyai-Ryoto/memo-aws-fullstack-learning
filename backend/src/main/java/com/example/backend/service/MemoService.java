@@ -8,8 +8,10 @@ import com.example.backend.dto.MemoSearchCondition;
 import com.example.backend.dto.request.MemoStatus;
 import com.example.backend.dto.request.MemoType;
 import com.example.backend.entity.Memo;
+import com.example.backend.entity.MemoHistory;
 import com.example.backend.exception.MemoNotFoundException;
 import com.example.backend.mapper.MemoMapper;
+import com.example.backend.repository.MemoHistoryRepository;
 import com.example.backend.repository.MemoRepository;
 import com.example.backend.repository.specification.MemoSpecifications;
 import com.example.backend.service.state.MemoState;
@@ -31,6 +33,7 @@ import java.util.List;
 public class MemoService {
 
     private final MemoRepository memoRepository;
+    private final MemoHistoryRepository memoHistoryRepository;
     private final MemoSortStrategyResolver memoSortStrategyResolver;
     private final MemoCreateTemplateResolver memoCreateTemplateResolver;
     private final MemoStateResolver memoStateResolver;
@@ -130,6 +133,9 @@ public class MemoService {
         Memo memo = memoRepository.findById(id)
                 .orElseThrow(() -> new MemoNotFoundException(id));
         
+        MemoHistory memoHistory = new MemoHistory(memo);
+        memoHistoryRepository.save(memoHistory);
+
         MemoState memoState = memoStateResolver.resolve(memo.getStatus());
         memoState.update(memo, title, content, tags);
     
