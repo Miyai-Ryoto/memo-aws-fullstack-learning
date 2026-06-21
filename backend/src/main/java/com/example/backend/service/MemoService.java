@@ -14,6 +14,7 @@ import com.example.backend.mapper.MemoMapper;
 import com.example.backend.repository.MemoHistoryRepository;
 import com.example.backend.repository.MemoRepository;
 import com.example.backend.repository.specification.MemoSpecifications;
+import com.example.backend.service.command.UpdateMemoCommand;
 import com.example.backend.service.state.MemoState;
 import com.example.backend.service.state.MemoStateResolver;
 import com.example.backend.service.strategy.MemoSortStrategyResolver;
@@ -129,19 +130,18 @@ public class MemoService {
     // 更新
     @Transactional
     public MemoResponse update(Long id, String title, String content, String tags) {
-    
-        Memo memo = memoRepository.findById(id)
-                .orElseThrow(() -> new MemoNotFoundException(id));
-        
-        MemoHistory memoHistory = new MemoHistory(memo);
-        memoHistoryRepository.save(memoHistory);
 
-        MemoState memoState = memoStateResolver.resolve(memo.getStatus());
-        memoState.update(memo, title, content, tags);
-    
-        Memo saved = memoRepository.save(memo);
-    
-        return MemoMapper.toResponse(saved);
+        UpdateMemoCommand command = new UpdateMemoCommand(
+                id,
+                title,
+                content,
+                tags,
+                memoRepository,
+                memoHistoryRepository,
+                memoStateResolver
+        );
+
+        return command.execute();
     }
 
     // 公開
@@ -174,7 +174,7 @@ public class MemoService {
         return MemoMapper.toResponse(saved);
     }
 
-    // 復元
+    // 状態復元
     @Transactional
     public MemoResponse restoreMemo(Long id) {
     
@@ -183,6 +183,26 @@ public class MemoService {
         
         MemoState memoState = memoStateResolver.resolve(memo.getStatus());
         memoState.restore(memo);
+    
+        Memo saved = memoRepository.save(memo);
+    
+        return MemoMapper.toResponse(saved);
+    }
+
+    // 元に戻す
+    @Transactional
+    public MemoResponse undo(Long id) {
+    
+        Memo memo = memoRepository.findById(id)
+                .orElseThrow(() -> new MemoNotFoundException(id));
+    
+        MemoHistory history = memoHistoryRepository
+                .findTopByMemoIdOrderBySavedAtDesc(id)
+                .orElseThrow(() -> new IllegalStateException("履歴が見つかりませんでした。"));
+    
+        memo.restoreFrom(history);
+    
+        memoHistoryRepository.delete(history);
     
         Memo saved = memoRepository.save(memo);
     

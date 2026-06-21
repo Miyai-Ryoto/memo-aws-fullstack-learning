@@ -50,6 +50,13 @@ public class Memo {
         this.content = content;
         this.tags = tags;
     }
+    
+    public void restoreFrom(MemoHistory history) {
+        this.status = history.getStatus();
+        this.title = history.getTitle();
+        this.content = history.getContent();
+        this.tags = history.getTags();
+    }
 
     @PreUpdate
     public void onUpdate() {

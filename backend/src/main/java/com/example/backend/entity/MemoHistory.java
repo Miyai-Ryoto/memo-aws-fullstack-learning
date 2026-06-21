@@ -39,4 +39,8 @@ public class MemoHistory {
         this.tags = memo.getTags();
         this.savedAt = LocalDateTime.now();
     }
+
+    public static MemoHistory from(Memo memo) {
+        return new MemoHistory(memo);
+    }
 }
