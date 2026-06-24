@@ -8,13 +8,12 @@ import com.example.backend.dto.MemoSearchCondition;
 import com.example.backend.dto.request.MemoStatus;
 import com.example.backend.dto.request.MemoType;
 import com.example.backend.entity.Memo;
-import com.example.backend.entity.MemoHistory;
 import com.example.backend.exception.MemoNotFoundException;
 import com.example.backend.mapper.MemoMapper;
-import com.example.backend.repository.MemoHistoryRepository;
 import com.example.backend.repository.MemoRepository;
 import com.example.backend.repository.specification.MemoSpecifications;
-import com.example.backend.service.command.UpdateMemoCommand;
+import com.example.backend.service.command.MemoCommand;
+import com.example.backend.service.factory.MemoCommandFactory;
 import com.example.backend.service.state.MemoState;
 import com.example.backend.service.state.MemoStateResolver;
 import com.example.backend.service.strategy.MemoSortStrategyResolver;
@@ -34,10 +33,10 @@ import java.util.List;
 public class MemoService {
 
     private final MemoRepository memoRepository;
-    private final MemoHistoryRepository memoHistoryRepository;
     private final MemoSortStrategyResolver memoSortStrategyResolver;
     private final MemoCreateTemplateResolver memoCreateTemplateResolver;
     private final MemoStateResolver memoStateResolver;
+    private final MemoCommandFactory memoCommandFactory;
 
     // 全件データ取得
     public List<MemoListResponce> findAllResponses() {
@@ -131,15 +130,8 @@ public class MemoService {
     @Transactional
     public MemoResponse update(Long id, String title, String content, String tags) {
 
-        UpdateMemoCommand command = new UpdateMemoCommand(
-                id,
-                title,
-                content,
-                tags,
-                memoRepository,
-                memoHistoryRepository,
-                memoStateResolver
-        );
+        MemoCommand<MemoResponse> command = 
+                memoCommandFactory.createUpdateCommand(id, title, content, tags);
 
         return command.execute();
     }
@@ -192,21 +184,10 @@ public class MemoService {
     // 元に戻す
     @Transactional
     public MemoResponse undo(Long id) {
-    
-        Memo memo = memoRepository.findById(id)
-                .orElseThrow(() -> new MemoNotFoundException(id));
-    
-        MemoHistory history = memoHistoryRepository
-                .findTopByMemoIdOrderBySavedAtDesc(id)
-                .orElseThrow(() -> new IllegalStateException("履歴が見つかりませんでした。"));
-    
-        memo.restoreFrom(history);
-    
-        memoHistoryRepository.delete(history);
-    
-        Memo saved = memoRepository.save(memo);
-    
-        return MemoMapper.toResponse(saved);
+        MemoCommand<MemoResponse> command = 
+                memoCommandFactory.createUndoCommand(id);
+
+        return command.execute();
     }
 
     public void seed() {
