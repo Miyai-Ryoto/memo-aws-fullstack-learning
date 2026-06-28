@@ -7,12 +7,17 @@ import com.example.backend.dto.request.MemoStatus;
 import com.example.backend.dto.request.MemoType;
 import com.example.backend.entity.Memo;
 import com.example.backend.repository.MemoRepository;
+import com.example.backend.service.validation.MemoCommonValidationChain;
+import com.example.backend.service.validation.link.LinkMemoValidationChain;
 
 @Component
 public class LinkMemoCreateTemplate extends MemoCreateTemplate {
 
-    public LinkMemoCreateTemplate(MemoRepository memoRepository) {
-        super(memoRepository);
+    private final LinkMemoValidationChain linkMemoValidationChain;
+
+    public LinkMemoCreateTemplate(MemoRepository memoRepository, MemoCommonValidationChain memoCommonValidationChain, LinkMemoValidationChain linkMemoValidationChain) {
+        super(memoRepository, memoCommonValidationChain);
+        this.linkMemoValidationChain = linkMemoValidationChain;
     }
 
     public MemoType getType() {
@@ -21,13 +26,7 @@ public class LinkMemoCreateTemplate extends MemoCreateTemplate {
 
     @Override
     protected void validateType(CreateMemoRequest request) {
-        if (request.getUrl() == null || request.getUrl().isBlank()) {
-            throw new IllegalArgumentException("リンクメモにはURLが必要です");
-        }
-
-        if (!request.getUrl().startsWith("http://") && !request.getUrl().startsWith("https://")) {
-            throw new IllegalArgumentException("URLの形式が不正です");
-        }
+        linkMemoValidationChain.build().validate(request);
     }
 
     @Override

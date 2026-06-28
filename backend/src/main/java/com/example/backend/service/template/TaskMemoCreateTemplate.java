@@ -7,12 +7,17 @@ import com.example.backend.dto.request.MemoStatus;
 import com.example.backend.dto.request.MemoType;
 import com.example.backend.entity.Memo;
 import com.example.backend.repository.MemoRepository;
+import com.example.backend.service.validation.MemoCommonValidationChain;
+import com.example.backend.service.validation.task.TaskMemoValidationChain;
 
 @Component
 public class TaskMemoCreateTemplate extends MemoCreateTemplate {
 
-    public TaskMemoCreateTemplate(MemoRepository memoRepository) {
-        super(memoRepository);
+    private final TaskMemoValidationChain taskMemoValidationChain;
+
+    public TaskMemoCreateTemplate(MemoRepository memoRepository, MemoCommonValidationChain memoCommonValidationChain, TaskMemoValidationChain taskMemoValidationChain) {
+        super(memoRepository, memoCommonValidationChain);
+        this.taskMemoValidationChain = taskMemoValidationChain;
     }
 
     public MemoType getType() {
@@ -21,21 +26,7 @@ public class TaskMemoCreateTemplate extends MemoCreateTemplate {
 
     @Override
     protected void validateType(CreateMemoRequest request) {
-        if (request.getDueDate() == null || request.getDueDate().isBlank()) {
-            throw new IllegalArgumentException("タスクメモには期限が必要です");
-        }
-
-        if (!request.getContent().contains("期限:")) {
-            throw new IllegalArgumentException("タスクメモには期限を入力してください");
-        }
-    
-        if (request.getContent().contains("期限:未定")) {
-            throw new IllegalArgumentException("期限未定のタスクは登録できません");
-        }
-    
-        if (request.getTags() == null || !request.getTags().contains("task")) {
-            throw new IllegalArgumentException("タスクメモには task タグが必要です");
-        }
+        taskMemoValidationChain.build().validate(request);
     }
 
     @Override

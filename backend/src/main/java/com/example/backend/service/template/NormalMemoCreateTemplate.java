@@ -7,12 +7,13 @@ import com.example.backend.dto.request.MemoStatus;
 import com.example.backend.dto.request.MemoType;
 import com.example.backend.entity.Memo;
 import com.example.backend.repository.MemoRepository;
+import com.example.backend.service.validation.MemoCommonValidationChain;
 
 @Component
 public class NormalMemoCreateTemplate extends MemoCreateTemplate {
 
-    public NormalMemoCreateTemplate(MemoRepository memoRepository) {
-        super(memoRepository);
+    public NormalMemoCreateTemplate(MemoRepository memoRepository, MemoCommonValidationChain memoCommonValidationChain) {
+        super(memoRepository, memoCommonValidationChain);
     }
 
     public MemoType getType() {
