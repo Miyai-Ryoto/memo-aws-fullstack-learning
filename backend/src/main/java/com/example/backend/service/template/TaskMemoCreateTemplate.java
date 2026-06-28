@@ -24,6 +24,18 @@ public class TaskMemoCreateTemplate extends MemoCreateTemplate {
         if (request.getDueDate() == null || request.getDueDate().isBlank()) {
             throw new IllegalArgumentException("タスクメモには期限が必要です");
         }
+
+        if (!request.getContent().contains("期限:")) {
+            throw new IllegalArgumentException("タスクメモには期限を入力してください");
+        }
+    
+        if (request.getContent().contains("期限:未定")) {
+            throw new IllegalArgumentException("期限未定のタスクは登録できません");
+        }
+    
+        if (request.getTags() == null || !request.getTags().contains("task")) {
+            throw new IllegalArgumentException("タスクメモには task タグが必要です");
+        }
     }
 
     @Override

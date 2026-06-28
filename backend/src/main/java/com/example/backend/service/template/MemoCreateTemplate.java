@@ -37,6 +37,30 @@ public abstract class MemoCreateTemplate {
         if (request.getTitle() == null || request.getTitle().isBlank()) {
             throw new IllegalArgumentException("タイトルは必須です");
         }
+
+        if (request.getContent() == null || request.getContent().isBlank()) {
+            throw new IllegalArgumentException("本文は必須です");
+        }
+    
+        if (request.getTitle() != null && request.getTitle().length() > 100) {
+            throw new IllegalArgumentException("タイトルは100文字以内で入力してください");
+        }
+    
+        if (request.getContent() != null && request.getContent().length() > 1000) {
+            throw new IllegalArgumentException("本文は1000文字以内で入力してください");
+        }
+    
+        if (request.getTags() != null && request.getTags().split(",").length > 10) {
+            throw new IllegalArgumentException("タグは10個以内にしてください");
+        }
+    
+        if (request.getTitle() != null && request.getTitle().contains("禁止")) {
+            throw new IllegalArgumentException("タイトルに禁止ワードが含まれています");
+        }
+    
+        if (request.getContent() != null && request.getContent().contains("禁止")) {
+            throw new IllegalArgumentException("本文に禁止ワードが含まれています");
+        }
     }
 
     protected abstract void validateType(CreateMemoRequest request);
